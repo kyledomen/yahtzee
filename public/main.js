@@ -1,0 +1,64 @@
+const socket = io();
+
+const form = document.getElementById('chatForm');
+const input = document.getElementById('messageInput');
+const messages = document.getElementById('messages');
+
+let myTurn = false;
+let rollCounter = 0;
+
+socket.on('your turn', () => {
+    const li = document.createElement('li');
+    li.textContent = '---my turn---';
+    messages.appendChild(li);
+
+    myTurn = true;
+});
+
+document.getElementById('rollButton').addEventListener('click', () => {
+    if (myTurn) {
+        const myRoll = roll_dice();
+        rollCounter++;
+
+        const li = document.createElement('li');
+        li.textContent = 'my roll is: ' + myRoll.toString();
+        messages.appendChild(li);
+
+        socket.emit('rolled', {roll: myRoll});
+
+        if (rollCounter >= 3) {
+            rollCounter = 0;
+            myTurn = false;
+
+            const li = document.createElement('li');
+            li.textContent = '---turn over---';
+            messages.appendChild(li);
+
+            socket.emit('turn over');
+        }
+    } else {
+        console.log('roll invalid');
+    }
+});
+
+socket.on('move made', (data) => {
+    console.log(`Player ${data.player} made a move:`, data.roll);
+
+    const li = document.createElement('li');
+    li.textContent = 'Other player roll is: ' + data.roll.toString();
+    messages.appendChild(li);
+});
+
+function roll_dice() {
+    const randomIntegers = [];
+
+    for (let i = 0; i < 5; i++) {
+        const randomNumber = Math.floor(Math.random() * 6) + 1;
+        randomIntegers.push(randomNumber);
+    }
+
+    return randomIntegers;
+}
+
+
+
