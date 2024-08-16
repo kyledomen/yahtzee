@@ -24,6 +24,33 @@ document.getElementById('rollButton').addEventListener('click', () => {
         li.textContent = 'my roll is: ' + myRoll.toString();
         messages.appendChild(li);
 
+
+        // button stuff
+        const myDice = [];
+        const container = document.getElementById('diceContainer');
+        container.innerHTML = '';
+        myRoll.forEach(value => {
+            const button = document.createElement('button');
+            button.textContent = value;
+            button.className = 'dice-button';
+
+            button.addEventListener('click', () => {
+                if (myDice.includes(value)) {
+                    const index = myDice.indexOf(value);
+                    myDice.splice(index, 1);
+                    console.log(`removed dice with value: ${value}`);
+                } else {
+                    myDice.push(value);
+                    console.log(`added dice with value: ${value}`);
+                }
+                console.log('myDice: ', myDice);
+            });
+
+            container.appendChild(button);
+
+            console.log('test');
+        });
+
         socket.emit('rolled', {roll: myRoll});
 
         if (rollCounter >= 3) {

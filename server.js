@@ -38,6 +38,17 @@ io.on('connection', (socket) => {
   });
 });
 
+function roll_dice() {
+    const randomIntegers = [];
+
+    for (let i = 0; i < 5; i++) {
+        const randomNumber = Math.floor(Math.random() * 6) + 1;
+        randomIntegers.push(randomNumber);
+    }
+
+    return randomIntegers;
+}
+
 // Start the server
 const PORT = 3000;
 server.listen(PORT, () => {
