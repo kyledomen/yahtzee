@@ -8,7 +8,7 @@ const io = socketIo(server);
 
 let players = [];
 let currentTurn = 0;
-let rollCounter = 0;
+let rollCounters = {};
 
 // Serve the client files
 app.use(express.static('public'));
@@ -18,24 +18,32 @@ io.on('connection', (socket) => {
     console.log('A player connected: ', socket.id);
 
     players.push(socket.id);
+    rollCounters[socket.id] = 0;
 
     if (players.length === 2) {
         io.to(players[currentTurn]).emit('your turn');
     }
 
-    socket.on('rolled', (data) => {
-        socket.broadcast.emit('move made', {player: socket.id, roll: data.roll, counter: data.counter});
-    });
+    socket.on('roll dice', (data) => {
+        if (players[currentTurn] === socket.id && rollCounters[socket.id] < 3) {
+            const myRoll = roll_dice();
+            rollCounters[socket.id] += 1;
 
-    socket.on('turn over', () => {
-        currentTurn = (currentTurn + 1) % players.length;
-        io.to(players[currentTurn]).emit('your turn');
-    });
+            socket.emit('rolled', {roll: myRoll, counter: rollCounters[socket.id]});
 
+            socket.broadcast.emit('move made', {player: socket.id, roll: myRoll, counter: rollCounters[socket.id]});
+
+            if (rollCounters[socket.id] >= 3) {
+                rollCounters[socket.id] = 0;
+                currentTurn = (currentTurn + 1) % players.length;
+                io.to(players[currentTurn]).emit('your turn');
+            }
+        }
+    });
 
     socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
+        console.log('User disconnected');
+    });
 });
 
 function roll_dice() {

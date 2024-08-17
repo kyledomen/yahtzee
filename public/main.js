@@ -1,11 +1,9 @@
 const socket = io();
 
-const form = document.getElementById('chatForm');
-const input = document.getElementById('messageInput');
 const messages = document.getElementById('messages');
+const container = document.getElementById('diceContainer');
 
 let myTurn = false;
-let rollCounter = 0;
 
 socket.on('your turn', () => {
     const li = document.createElement('li');
@@ -16,56 +14,42 @@ socket.on('your turn', () => {
 });
 
 document.getElementById('rollButton').addEventListener('click', () => {
-    if (myTurn) {
-        const myRoll = roll_dice();
-        rollCounter++;
+    if (myTurn)
+        socket.emit('roll dice');
+});
 
-        const li = document.createElement('li');
-        li.textContent = 'my roll is: ' + myRoll.toString();
-        messages.appendChild(li);
+socket.on('rolled', (data) => {
+    const li = document.createElement('li');
+    li.textContent = 'my roll is: ' + data.roll.toString() + ' (Roll count: ' + data.counter + ')';
+    messages.appendChild(li);
 
+    // Handle dice buttons for the client-side display
+    container.innerHTML = '';
+    const myDice = [];
 
-        // button stuff
-        const myDice = [];
-        const container = document.getElementById('diceContainer');
-        container.innerHTML = '';
-        myRoll.forEach(value => {
-            const button = document.createElement('button');
-            button.textContent = value;
-            button.className = 'dice-button';
+    data.roll.forEach((value, index) => {
+        const button = document.createElement('button');
+        button.textContent = value;
+        button.className = 'dice-button';
 
-            button.addEventListener('click', () => {
-                if (myDice.includes(value)) {
-                    const index = myDice.indexOf(value);
-                    myDice.splice(index, 1);
-                    console.log(`removed dice with value: ${value}`);
-                } else {
-                    myDice.push(value);
-                    console.log(`added dice with value: ${value}`);
-                }
-                console.log('myDice: ', myDice);
-            });
+        button.addEventListener('click', () => {
+            const dice = { value, index };  // Store both value and index
 
-            container.appendChild(button);
+            const foundIndex = myDice.findIndex(d => d.index === index && d.value === value);
 
-            console.log('test');
+            if (foundIndex !== -1) {
+                myDice.splice(foundIndex, 1);  // Remove dice if found
+                console.log(`removed dice with value: ${value} at index ${index}`);
+            } else {
+                myDice.push(dice);  // Add dice if not found
+                console.log(`added dice with value: ${value} at index ${index}`);
+            }
+
+            console.log('myDice: ', myDice);
         });
 
-        socket.emit('rolled', {roll: myRoll});
-
-        if (rollCounter >= 3) {
-            rollCounter = 0;
-            myTurn = false;
-
-            const li = document.createElement('li');
-            li.textContent = '---turn over---';
-            messages.appendChild(li);
-
-            socket.emit('turn over');
-        }
-    } else {
-        console.log('roll invalid');
-    }
+        container.appendChild(button);
+    });
 });
 
 socket.on('move made', (data) => {
