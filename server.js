@@ -27,8 +27,6 @@ io.on('connection', (socket) => {
 
     socket.on('roll dice', (dice) => {
         if (players[currentTurn] === socket.id && rollCounters[socket.id] < 3) {
-            // const roll = roll_dice(numberOfDice - dice.length);
-
             console.log('asdf: ', dice);
 
             let roll;
@@ -51,7 +49,7 @@ io.on('connection', (socket) => {
                 io.to(players[currentTurn]).emit('your turn');
 
                 let otherPlayer = (currentTurn + 1) % players.length;
-                io.to(players[otherPlayer]).emit('not your turn');
+                io.to(players[otherPlayer]).emit('finished rolling', roll);
             }
         }
     });

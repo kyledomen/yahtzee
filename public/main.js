@@ -4,8 +4,8 @@ const messages = document.getElementById('messages');
 const container = document.getElementById('diceContainer');
 
 let myTurn = false;
-const myDice = [];
-const turnDice = [];
+let myDice = [];
+let turnDice = [];
 
 socket.on('your turn', () => {
     const li = document.createElement('li');
@@ -16,9 +16,24 @@ socket.on('your turn', () => {
     myTurn = true;
 });
 
-socket.on('not your turn', () => {
-    myDice = [];
+socket.on('finished rolling', (remainingDice) => {
+    if (myDice.length < 5) {
+        let offset = myDice.length;
+        for (let i = 0; i < remainingDice.length; i++) {
+            myDice.push({ value: remainingDice[i], index: offset + i});
+        }
+    }
+
+    // print resulting dice on page
+    const li = document.createElement('li');
+    let str = 'Final dice: ';
+    for (let i = 0; i < myDice.length; i++)
+        str = str +  String(myDice[i].value) + ', ';
+    li.textContent = str;
+    messages.appendChild(li);
+
     turnDice = [];
+
 
     document.getElementById('rollButton').disabled = true;
     document.getElementById('diceContainer').innerHTML = '';
@@ -29,6 +44,8 @@ document.getElementById('rollButton').addEventListener('click', () => {
         let offset = myDice.length;
         for (let i = 0; i < turnDice.length; i++) 
             myDice.push({ value: turnDice[i].value, index: offset + i});
+
+        turnDice = [];
         
         console.log('myDice: ', myDice);
         console.log('turnDice: ', turnDice);
@@ -38,8 +55,9 @@ document.getElementById('rollButton').addEventListener('click', () => {
 });
 
 socket.on('rolled', (data) => {
+    // put the roll on the webpage
     const li = document.createElement('li');
-    li.textContent = 'my roll is: ' + data.roll.toString() + ' (Roll count: ' + data.counter + ')';
+    li.textContent = 'I rolled: ' + data.roll.toString() + ' (Roll count: ' + data.counter + ')';
     messages.appendChild(li);
 
     // Handle dice buttons for the client-side display
@@ -57,10 +75,8 @@ socket.on('rolled', (data) => {
 
             if (foundIndex !== -1) {
                 turnDice.splice(foundIndex, 1);  // Remove dice if found
-                //console.log(`removed dice with value: ${value} at index ${index}`);
             } else {
                 turnDice.push(dice);  // Add dice if not found
-                //console.log(`added dice with value: ${value} at index ${index}`);
             }
 
         });
