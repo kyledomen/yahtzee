@@ -54,6 +54,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('calculate score', (dice) => {
+        console.log(dice);
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });

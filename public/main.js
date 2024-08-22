@@ -32,8 +32,8 @@ socket.on('finished rolling', (remainingDice) => {
     li.textContent = str;
     messages.appendChild(li);
 
-    turnDice = [];
-
+    // no more rolls, calculate possible scores
+    socket.emit('calculate score', myDice);
 
     document.getElementById('rollButton').disabled = true;
     document.getElementById('diceContainer').innerHTML = '';
