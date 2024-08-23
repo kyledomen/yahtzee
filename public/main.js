@@ -17,6 +17,7 @@ socket.on('your turn', () => {
 });
 
 socket.on('finished rolling', (remainingDice) => {
+    // fill in remaining dice on the last roll
     if (myDice.length < 5) {
         let offset = myDice.length;
         for (let i = 0; i < remainingDice.length; i++) {
@@ -75,8 +76,10 @@ socket.on('rolled', (data) => {
 
             if (foundIndex !== -1) {
                 turnDice.splice(foundIndex, 1);  // Remove dice if found
+                socket.emit('dice removed', dice);
             } else {
                 turnDice.push(dice);  // Add dice if not found
+                socket.emit('dice added', dice);
             }
 
         });
@@ -85,11 +88,23 @@ socket.on('rolled', (data) => {
     });
 });
 
-socket.on('move made', (data) => {
-    console.log(`Player ${data.player} made a move:`, data.roll);
+socket.on('opponent rolled', (data) => {
+    console.log(`Player ${data.player} rolled:`, data.roll);
 
     const li = document.createElement('li');
     li.textContent = 'Other player roll is: ' + data.roll.toString();
+    messages.appendChild(li);
+});
+
+socket.on('opponent added dice', (dice) => {
+    const li = document.createElement('li');
+    li.textContent = 'Other player added dice to their hand: ' + dice.value.toString();
+    messages.appendChild(li);
+});
+
+socket.on('opponent removed dice', (dice) => {
+    const li = document.createElement('li');
+    li.textContent = 'Other player removed dice from their hand: ' + dice.value.toString();
     messages.appendChild(li);
 });
 

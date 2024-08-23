@@ -27,8 +27,6 @@ io.on('connection', (socket) => {
 
     socket.on('roll dice', (dice) => {
         if (players[currentTurn] === socket.id && rollCounters[socket.id] < 3) {
-            console.log('asdf: ', dice);
-
             let roll;
             if ((typeof dice.length) === 'undefined') {
                 roll = roll_dice(numberOfDice);
@@ -41,7 +39,8 @@ io.on('connection', (socket) => {
 
             socket.emit('rolled', {roll: roll, counter: rollCounters[socket.id]});
 
-            socket.broadcast.emit('move made', {player: socket.id, roll: roll, counter: rollCounters[socket.id]});
+            // display the current roll to other players
+            socket.broadcast.emit('opponent rolled', {player: socket.id, roll: roll, counter: rollCounters[socket.id]});
 
             if (rollCounters[socket.id] >= 3) {
                 rollCounters[socket.id] = 0;
@@ -52,6 +51,14 @@ io.on('connection', (socket) => {
                 io.to(players[otherPlayer]).emit('finished rolling', roll);
             }
         }
+    });
+
+    socket.on('dice added', (dice) => {
+        socket.broadcast.emit('opponent added dice', dice);
+    });
+
+    socket.on('dice removed', (dice) => {
+        socket.broadcast.emit('opponent removed dice', dice);
     });
 
     socket.on('calculate score', (dice) => {
