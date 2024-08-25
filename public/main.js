@@ -45,15 +45,16 @@ socket.on('finished rolling', (remainingDice) => {
 
 document.getElementById('rollButton').addEventListener('click', () => {
     if (myTurn) {
+
+        // insert the turn dice into the users hand in ascending order
         let offset = myDice.length;
         for (let i = 0; i < turnDice.length; i++) 
             myDice.push({ value: turnDice[i].value, index: offset + i});
 
+        myDice.sort((a, b) => a.value - b.value);
+
         turnDice = [];
         
-        console.log('myDice: ', myDice);
-        console.log('turnDice: ', turnDice);
-
         socket.emit('roll dice', myDice);
     }
 });
@@ -67,21 +68,22 @@ socket.on('rolled', (data) => {
     // Handle dice buttons for the client-side display
     container.innerHTML = '';
 
-    data.roll.forEach((value, index) => {
+    myDice.forEach((value, index) => {
         const button = document.createElement('button');
         button.textContent = value;
         button.className = 'dice-button';
 
         button.addEventListener('click', () => {
-            const dice = { value, index };  // Store both value and index
+            const dice = { value, index };
 
             const foundIndex = turnDice.findIndex(d => d.index === index && d.value === value);
 
             if (foundIndex !== -1) {
-                turnDice.splice(foundIndex, 1);  // Remove dice if found
+                // dice found, remove the dice from hand
+                turnDice.splice(foundIndex, 1);
                 socket.emit('dice removed', dice);
             } else {
-                turnDice.push(dice);  // Add dice if not found
+                turnDice.push(dice);
                 socket.emit('dice added', dice);
             }
 
