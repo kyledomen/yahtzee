@@ -14,6 +14,9 @@ socket.on('your turn', () => {
 
     document.getElementById('rollButton').disabled = false;
     myTurn = true;
+
+    myDice = [];
+    turnDice = [];
 });
 
 socket.on('finished rolling', (remainingDice) => {

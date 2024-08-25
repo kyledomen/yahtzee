@@ -30,6 +30,7 @@ io.on('connection', (socket) => {
             let roll;
             if ((typeof dice.length) === 'undefined') {
                 roll = roll_dice(numberOfDice);
+                console.log(1);
             } else {
                 roll = roll_dice(numberOfDice - dice.length);
             }
