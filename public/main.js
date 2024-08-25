@@ -5,7 +5,6 @@ const container = document.getElementById('diceContainer');
 
 let myTurn = false;
 let myDice = [];
-let turnDice = [];
 
 socket.on('your turn', () => {
     const li = document.createElement('li');
@@ -16,7 +15,6 @@ socket.on('your turn', () => {
     myTurn = true;
 
     myDice = [];
-    turnDice = [];
 });
 
 socket.on('finished rolling', (remainingDice) => {
@@ -45,20 +43,13 @@ socket.on('finished rolling', (remainingDice) => {
 
 document.getElementById('rollButton').addEventListener('click', () => {
     if (myTurn) {
-
-        // insert the turn dice into the users hand in ascending order
-        let offset = myDice.length;
-        for (let i = 0; i < turnDice.length; i++) 
-            myDice.push({ value: turnDice[i].value, index: offset + i});
-
         myDice.sort((a, b) => a.value - b.value);
 
-        turnDice = [];
-        
         socket.emit('roll dice', myDice);
     }
 });
 
+// todo: take incoming roll and turn into myDice instead of turnDice
 socket.on('rolled', (data) => {
     // put the roll on the webpage
     const li = document.createElement('li');
@@ -68,7 +59,7 @@ socket.on('rolled', (data) => {
     // Handle dice buttons for the client-side display
     container.innerHTML = '';
 
-    myDice.forEach((value, index) => {
+    data.roll.forEach((value, index) => {
         const button = document.createElement('button');
         button.textContent = value;
         button.className = 'dice-button';
@@ -76,14 +67,14 @@ socket.on('rolled', (data) => {
         button.addEventListener('click', () => {
             const dice = { value, index };
 
-            const foundIndex = turnDice.findIndex(d => d.index === index && d.value === value);
+            const foundIndex = myDice.findIndex(d => d.index === index && d.value === value);
 
             if (foundIndex !== -1) {
                 // dice found, remove the dice from hand
-                turnDice.splice(foundIndex, 1);
+                myDice.splice(foundIndex, 1);
                 socket.emit('dice removed', dice);
             } else {
-                turnDice.push(dice);
+                myDice.push(dice);
                 socket.emit('dice added', dice);
             }
 
