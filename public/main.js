@@ -51,7 +51,15 @@ document.getElementById('rollButton').addEventListener('click', () => {
 
 // todo: take incoming roll and turn into myDice instead of turnDice
 socket.on('rolled', (data) => {
-    // put the roll on the webpage
+    // Combine myDice and data.roll into tempMyDice
+    const tempMyDice = [...myDice]; // Copy existing myDice
+    const offset = myDice.length;
+
+    data.roll.forEach((value, index) => {
+        tempMyDice.push({ value, index: offset + index });
+    });
+
+    // Put the roll on the webpage
     const li = document.createElement('li');
     li.textContent = 'I rolled: ' + data.roll.toString() + ' (Roll count: ' + data.counter + ')';
     messages.appendChild(li);
@@ -59,25 +67,23 @@ socket.on('rolled', (data) => {
     // Handle dice buttons for the client-side display
     container.innerHTML = '';
 
-    data.roll.forEach((value, index) => {
+    // Use tempMyDice to populate the buttons
+    tempMyDice.forEach((dice) => {
         const button = document.createElement('button');
-        button.textContent = value;
+        button.textContent = dice.value;
         button.className = 'dice-button';
 
         button.addEventListener('click', () => {
-            const dice = { value, index };
-
-            const foundIndex = myDice.findIndex(d => d.index === index && d.value === value);
+            const foundIndex = myDice.findIndex(d => d.index === dice.index && d.value === dice.value);
 
             if (foundIndex !== -1) {
-                // dice found, remove the dice from hand
+                // Dice found, remove the dice from hand
                 myDice.splice(foundIndex, 1);
                 socket.emit('dice removed', dice);
             } else {
                 myDice.push(dice);
                 socket.emit('dice added', dice);
             }
-
         });
 
         container.appendChild(button);
