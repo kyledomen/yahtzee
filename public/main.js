@@ -52,7 +52,7 @@ document.getElementById('rollButton').addEventListener('click', () => {
 // todo: take incoming roll and turn into myDice instead of turnDice
 socket.on('rolled', (data) => {
     // Combine myDice and data.roll into tempMyDice
-    const tempMyDice = [...myDice]; // Copy existing myDice
+    const tempMyDice = [...myDice];
     const offset = myDice.length;
 
     data.roll.forEach((value, index) => {
@@ -64,7 +64,7 @@ socket.on('rolled', (data) => {
     li.textContent = 'I rolled: ' + data.roll.toString() + ' (Roll count: ' + data.counter + ')';
     messages.appendChild(li);
 
-    // Handle dice buttons for the client-side display
+    // clear the button from last time
     container.innerHTML = '';
 
     // Use tempMyDice to populate the buttons
@@ -88,6 +88,8 @@ socket.on('rolled', (data) => {
 
         container.appendChild(button);
     });
+
+    socket.emit('calculate score', tempMyDice);
 });
 
 socket.on('opponent rolled', (data) => {

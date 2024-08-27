@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('calculate score', (dice) => {
-        console.log(dice);
+        console.log('calculate score', dice);
     });
 
     socket.on('disconnect', () => {
