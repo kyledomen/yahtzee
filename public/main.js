@@ -1,6 +1,6 @@
 const socket = io();
 
-const messages = document.getElementById('messages');
+const messages = document.getElementById('messagesContainer');
 const container = document.getElementById('diceContainer');
 
 let myTurn = false;
@@ -49,7 +49,6 @@ document.getElementById('rollButton').addEventListener('click', () => {
     }
 });
 
-// todo: take incoming roll and turn into myDice instead of turnDice
 socket.on('rolled', (data) => {
     // Combine myDice and data.roll into tempMyDice
     const tempMyDice = [...myDice];
@@ -92,6 +91,17 @@ socket.on('rolled', (data) => {
     socket.emit('calculate score', tempMyDice);
 });
 
+socket.on('update scorecard', (scores) => {
+    console.log(scores);
+
+    for (const category in scores) {
+        const scoreElement = document.getElementById(category);
+        
+        if (scoreElement && !scoreElement.classList.contains('locked'))
+            scoreElement.textContent = scores[category];
+    }
+});
+
 socket.on('opponent rolled', (data) => {
     console.log(`Player ${data.player} rolled:`, data.roll);
 
@@ -111,17 +121,3 @@ socket.on('opponent removed dice', (dice) => {
     li.textContent = 'Other player removed dice from their hand: ' + dice.value.toString();
     messages.appendChild(li);
 });
-
-function roll_dice() {
-    const randomIntegers = [];
-
-    for (let i = 0; i < 5; i++) {
-        const randomNumber = Math.floor(Math.random() * 6) + 1;
-        randomIntegers.push(randomNumber);
-    }
-
-    return randomIntegers;
-}
-
-
-

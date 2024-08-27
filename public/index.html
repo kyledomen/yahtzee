@@ -1,23 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yhatzee-ish</title>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    ul { list-style-type: none; margin: 0; padding: 0; }
-    li { padding: 8px; margin-bottom: 10px; background-color: #f1f1f1; }
-  </style>
-</head>
-<body>
-  <h1>Yhatzee App</h1>
-  <ul id="messages"></ul>
-  <button id="rollButton">Roll</button>
-  <div class="dice-container" id="diceContainer"></div>
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yhatzee-ish</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        ul { list-style-type: none; margin: 0; padding: 0; }
+        li { padding: 8px; margin-bottom: 10px; background-color: #f1f1f1; }
+    </style>
+    </head>
+    <body>
+        <h1>Yhatzee App</h1>
+        <h3>Yahtzee Scorecard</h3>
+        <div id="scoreboard">
+        <p>Ones: <span id="ones">0</span></p>
+        <p>Twos: <span id="twos">0</span></p>
+        <p>Threes: <span id="threes">0</span></p>
+        <p>Fours: <span id="fours">0</span></p>
+        <p>Fives: <span id="fives">0</span></p>
+        <p>Sixes: <span id="sixes">0</span></p>
+        <p>Three of a Kind: <span id="threeOfAKind">0</span></p>
+        <p>Four of a Kind: <span id="fourOfAKind">0</span></p>
+        <p>Full House: <span id="fullHouse">0</span></p>
+        <p>Small Straight: <span id="smallStraight">0</span></p>
+        <p>Large Straight: <span id="largeStraight">0</span></p>
+        <p>Yahtzee: <span id="yahtzee">0</span></p>
+        <p>Chance: <span id="chance">0</span></p>
+        </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="main.js"></script>
-</body>
+        <ul id="messagesContainer"></ul>
+        <button id="rollButton">Roll</button>
+        <div class="dice-container" id="diceContainer"></div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="main.js"></script>
+    </body>
 </html>
 
