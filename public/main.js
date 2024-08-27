@@ -8,12 +8,16 @@ let myDice = [];
 
 socket.on('your turn', () => {
     const li = document.createElement('li');
-    li.textContent = '---my turn---';
+    li.textContent = '---[my turn]---';
     messages.appendChild(li);
 
+    // enable all the buttons for the player
     document.getElementById('rollButton').disabled = false;
-    myTurn = true;
+    document.querySelectorAll('.score-field').forEach(button => {
+        button.disabled = false;
+    });
 
+    myTurn = true;
     myDice = [];
 });
 
@@ -34,9 +38,9 @@ socket.on('finished rolling', (remainingDice) => {
     li.textContent = str;
     messages.appendChild(li);
 
-    // no more rolls, calculate possible scores
+    // no more rolls, calculate possible scores | END OF TURN
     socket.emit('calculate score', myDice);
-
+    
     document.getElementById('rollButton').disabled = true;
     document.getElementById('diceContainer').innerHTML = '';
 });
@@ -47,6 +51,23 @@ document.getElementById('rollButton').addEventListener('click', () => {
 
         socket.emit('roll dice', myDice);
     }
+});
+
+document.querySelectorAll('.score-field').forEach(field => {
+    field.addEventListener('click', function() {
+        if (!this.classList.contains('locked') && myTurn) {
+            const category = this.id;
+            const score = parseInt(this.textContent);
+            this.style.color = "red";
+            socket.emit('lock score', category, score)
+
+            // END OF TURN
+            document.getElementById('rollButton').disabled = true;
+            document.querySelectorAll('.score-field').forEach(button => {
+                button.disabled = true;
+            });
+        }
+    });
 });
 
 socket.on('rolled', (data) => {
@@ -100,6 +121,12 @@ socket.on('update scorecard', (scores) => {
         if (scoreElement && !scoreElement.classList.contains('locked'))
             scoreElement.textContent = scores[category];
     }
+});
+
+socket.on('score locked', (category, score) => {
+    const scoreElement = document.getElementById(category);
+    scoreElement.textContent = score;
+    scoreElement.classList.add('locked');
 });
 
 socket.on('opponent rolled', (data) => {

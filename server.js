@@ -78,6 +78,11 @@ io.on('connection', (socket) => {
             socket.emit('score locked', category, score);
             socket.broadcast.emit('opponent locked score', socket.id, category, score);
         }
+
+        // END OF TURN
+        rollCounters[socket.id] = 0;
+        currentTurn = (currentTurn + 1) % players.length;
+        io.to(players[currentTurn]).emit('your turn');
     });
 
     socket.on('disconnect', () => {
