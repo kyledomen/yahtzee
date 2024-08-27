@@ -44,9 +44,8 @@ io.on('connection', (socket) => {
             // display the current roll to other players
             socket.broadcast.emit('opponent rolled', {player: socket.id, roll: roll, counter: rollCounters[socket.id]});
 
-            if (rollCounters[socket.id] >= 3) {
+            if (rollCounters[socket.id] >= 3)
                 io.to(players[currentTurn]).emit('finished rolling', roll);
-            }
         }
     });
 

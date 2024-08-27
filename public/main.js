@@ -6,29 +6,23 @@ const container = document.getElementById('diceContainer');
 let myTurn = false;
 let myDice = [];
 
+// disable scorecard
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.score-field').forEach(cell => {
+        cell.classList.add('disabled');
+    });
+});
+
 socket.on('your turn', () => {
     const li = document.createElement('li');
     li.textContent = '---[my turn]---';
     messages.appendChild(li);
 
-    // enable all the buttons for the player
+    // enable the roll button for the player
     document.getElementById('rollButton').disabled = false;
-    document.querySelectorAll('.score-field').forEach(button => {
-        button.disabled = false;
-    });
 
     myTurn = true;
     myDice = [];
-});
-
-socket.on('not your turn', () => {
-    // disable all the buttons for the player
-    document.getElementById('rollButton').disabled = true;
-    document.querySelectorAll('.score-field').forEach(field => {
-        field.disabled = true;
-        if (!field.classList.contains('locked'))
-            field.textContent = '';
-    });
 });
 
 socket.on('finished rolling', (remainingDice) => {
@@ -59,6 +53,17 @@ document.getElementById('rollButton').addEventListener('click', () => {
     if (myTurn) {
         myDice.sort((a, b) => a.value - b.value);
 
+        // enable scorecard buttons
+        document.querySelectorAll('.score-field').forEach(cell => {
+            console.log(cell);
+
+            // don't enable clicking for the score cells already recorded
+            if (!cell.classList.contains('locked'))
+                cell.classList.remove('disabled');
+
+            cell.classList.add('enabled');
+        });
+
         socket.emit('roll dice', myDice);
     }
 });
@@ -72,12 +77,7 @@ document.querySelectorAll('.score-field').forEach(field => {
             const score = parseInt(this.textContent);
             this.style.color = "red";
             socket.emit('lock score', category, score)
-
-            // END OF TURN
-            document.getElementById('rollButton').disabled = true;
-            document.querySelectorAll('.score-field').forEach(button => {
-                button.disabled = true;
-            });
+            
         }
     });
 });
@@ -139,6 +139,25 @@ socket.on('score locked', (category, score) => {
     const scoreElement = document.getElementById(category);
     scoreElement.textContent = score;
     scoreElement.classList.add('locked');
+
+    // disable roll button
+    document.getElementById('rollButton').disabled = true;
+
+    // clear dice buttons
+    container.innerHTML = '';
+
+    // disable scorecard buttons
+    document.querySelectorAll('.score-field').forEach(cell => {
+        cell.classList.remove('enabled');
+
+        // don't add 'disable' class to cells already with recorded cells (don't double disable)
+        if (!cell.classList.contains('disabled'))
+            cell.classList.add('disabled');
+
+        // if there's no recorded score, then clear that row of the scorecard
+        if (!cell.classList.contains('locked'))
+            cell.innerHTML = '';
+    });
 });
 
 socket.on('opponent rolled', (data) => {
