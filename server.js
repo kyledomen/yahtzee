@@ -32,7 +32,6 @@ io.on('connection', (socket) => {
             let roll;
             if ((typeof dice.length) === 'undefined') {
                 roll = roll_dice(numberOfDice);
-                console.log(1);
             } else {
                 roll = roll_dice(numberOfDice - dice.length);
             }
@@ -46,12 +45,7 @@ io.on('connection', (socket) => {
             socket.broadcast.emit('opponent rolled', {player: socket.id, roll: roll, counter: rollCounters[socket.id]});
 
             if (rollCounters[socket.id] >= 3) {
-                rollCounters[socket.id] = 0;
-                currentTurn = (currentTurn + 1) % players.length;
-                io.to(players[currentTurn]).emit('your turn');
-
-                let otherPlayer = (currentTurn + 1) % players.length;
-                io.to(players[otherPlayer]).emit('finished rolling', roll);
+                io.to(players[currentTurn]).emit('finished rolling', roll);
             }
         }
     });
@@ -65,8 +59,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('calculate score', (dice) => {
-        console.log('calculate score', dice);
-
         const scores = calculateScores(dice.map(d => d.value));
         socket.emit('update scorecard', scores);
     });

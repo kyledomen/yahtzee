@@ -21,6 +21,16 @@ socket.on('your turn', () => {
     myDice = [];
 });
 
+socket.on('not your turn', () => {
+    // disable all the buttons for the player
+    document.getElementById('rollButton').disabled = true;
+    document.querySelectorAll('.score-field').forEach(field => {
+        field.disabled = true;
+        if (!field.classList.contains('locked'))
+            field.textContent = '';
+    });
+});
+
 socket.on('finished rolling', (remainingDice) => {
     // fill in remaining dice on the last roll
     if (myDice.length < 5) {
@@ -56,6 +66,8 @@ document.getElementById('rollButton').addEventListener('click', () => {
 document.querySelectorAll('.score-field').forEach(field => {
     field.addEventListener('click', function() {
         if (!this.classList.contains('locked') && myTurn) {
+            console.log('click registered');
+
             const category = this.id;
             const score = parseInt(this.textContent);
             this.style.color = "red";
