@@ -97,6 +97,7 @@ function roll_dice(totalDice) {
     return randomIntegers;
 }
 
+/*
 function calculateScores(roll) {
     const scores = {
         ones: roll.filter(die => die === 1).reduce((sum, die) => sum + die, 0),
@@ -115,7 +116,80 @@ function calculateScores(roll) {
     };
 
     return scores;
+}*/
+
+function calculateScores(roll) {
+    const counts = {};
+    roll.forEach(die => counts[die] = (counts[die] || 0) + 1);
+
+    // Check for three of a kind, four of a kind, and Yahtzee
+    let threeOfAKind = 0, fourOfAKind = 0, yahtzee = 0;
+    let fullHouse = 0;
+    let hasThree = false, hasTwo = false;
+
+    for (const die in counts) {
+        if (counts[die] === 3) {
+            threeOfAKind = roll.reduce((sum, die) => sum + die, 0);
+            hasThree = true;
+        } else if (counts[die] === 4) {
+            fourOfAKind = roll.reduce((sum, die) => sum + die, 0);
+            threeOfAKind = roll.reduce((sum, die) => sum + die, 0); // 4 of a kind implies 3 of a kind
+        } else if (counts[die] === 5) {
+            yahtzee = 50;
+        }
+
+        if (counts[die] === 3) hasThree = true;
+        if (counts[die] === 2) hasTwo = true;
+    }
+
+    if (hasThree && hasTwo) {
+        fullHouse = 25;
+    }
+
+    // Check for straights
+    const sortedRoll = [...new Set(roll)].sort((a, b) => a - b);
+    let smallStraight = 0, largeStraight = 0;
+
+    const straights = [
+        [1, 2, 3, 4],
+        [2, 3, 4, 5],
+        [3, 4, 5, 6]
+    ];
+
+    const largeStraights = [
+        [1, 2, 3, 4, 5],
+        [2, 3, 4, 5, 6]
+    ];
+
+    straights.forEach(straight => {
+        if (straight.every(val => sortedRoll.includes(val))) {
+            smallStraight = 30;
+        }
+    });
+
+    largeStraights.forEach(straight => {
+        if (straight.every(val => sortedRoll.includes(val))) {
+            largeStraight = 40;
+        }
+    });
+
+    return {
+        threeOfAKind,
+        fourOfAKind,
+        fullHouse,
+        smallStraight,
+        largeStraight,
+        yahtzee,
+        chance: roll.reduce((sum, die) => sum + die, 0),
+        ones: counts[1] ? counts[1] * 1 : 0,
+        twos: counts[2] ? counts[2] * 2 : 0,
+        threes: counts[3] ? counts[3] * 3 : 0,
+        fours: counts[4] ? counts[4] * 4 : 0,
+        fives: counts[5] ? counts[5] * 5 : 0,
+        sixes: counts[6] ? counts[6] * 6 : 0,
+    };
 }
+
 
 function initializeScorecard() {
     return {
