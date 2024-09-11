@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
             scorecards[socket.id][category].value = score;
             scorecards[socket.id][category].locked = true;
             socket.emit('score locked', category, score);
-            socket.broadcast.emit('opponent locked score', socket.id, category, score);
+            socket.broadcast.emit('opponent locked score', {player: socket.id, category: category, score: score});
         }
 
         // END OF TURN
@@ -96,27 +96,6 @@ function roll_dice(totalDice) {
 
     return randomIntegers;
 }
-
-/*
-function calculateScores(roll) {
-    const scores = {
-        ones: roll.filter(die => die === 1).reduce((sum, die) => sum + die, 0),
-        twos: roll.filter(die => die === 2).reduce((sum, die) => sum + die, 0),
-        threes: roll.filter(die => die === 3).reduce((sum, die) => sum + die, 0),
-        fours: roll.filter(die => die === 4).reduce((sum, die) => sum + die, 0),
-        fives: roll.filter(die => die === 5).reduce((sum, die) => sum + die, 0),
-        sixes: roll.filter(die => die === 6).reduce((sum, die) => sum + die, 0),
-        threeOfAKind: roll.reduce((sum, die) => sum + die, 0),
-        fourOfAKind: roll.reduce((sum, die) => sum + die, 0),
-        fullHouse: 25,
-        smallStraight: 30,
-        largeStraight: 40,
-        yahtzee: 50,
-        chance: roll.reduce((sum, die) => sum + die, 0),
-    };
-
-    return scores;
-}*/
 
 function calculateScores(roll) {
     const counts = {};

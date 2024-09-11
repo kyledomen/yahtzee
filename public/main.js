@@ -55,7 +55,6 @@ document.getElementById('rollButton').addEventListener('click', () => {
 
         // enable scorecard buttons
         document.querySelectorAll('.score-field').forEach(cell => {
-            console.log(cell);
 
             // don't enable clicking for the score cells already recorded
             if (!cell.classList.contains('locked'))
@@ -68,10 +67,10 @@ document.getElementById('rollButton').addEventListener('click', () => {
     }
 });
 
-document.querySelectorAll('.score-field').forEach(field => {
+document.querySelectorAll('.score-field.player-score').forEach(field => {
     field.addEventListener('click', function() {
         if (!this.classList.contains('locked') && myTurn) {
-            console.log('click registered');
+            console.log('registered click ya know');
 
             const category = this.id;
             const score = parseInt(this.textContent);
@@ -178,4 +177,18 @@ socket.on('opponent removed dice', (dice) => {
     const li = document.createElement('li');
     li.textContent = 'Other player removed dice from their hand: ' + dice.value.toString();
     messages.appendChild(li);
+});
+
+socket.on('opponent locked score', (data) => {
+    console.log(data.player);
+    console.log(data.category);
+    console.log(data.score);
+
+    const oppCategory = "opponent-" + data.category;
+    const oppScoreElement = document.getElementById(oppCategory);
+
+    if (oppScoreElement) {
+        oppScoreElement.textContent = data.score;
+        oppScoreElement.style.color = "red";
+    }
 });
